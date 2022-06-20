@@ -126,31 +126,6 @@
                                    team-name room-name (slack-thread-message-p message))
                         (funcall slack-message-notification-title-format-function
                                  team-name room-name (slack-thread-message-p message)))
-               (defun slack-message-notify-alert (message room team)
-  (if (slack-message-notify-p message room team)
-      (let ((team-name (oref team name))
-            (room-name (slack-room-name room team))
-            (text (with-temp-buffer
-                    (goto-char (point-min))
-                    (insert (slack-message-to-alert message team))
-                    (slack-buffer-buttonize-link)
-                    (buffer-substring-no-properties (point-min)
-                                                    (point-max))))
-            (user-name (slack-message-sender-name message team)))
-        (if (and (eq alert-default-style 'notifier)
-                 (slack-im-p room)
-                 (or (eq (aref text 0) ?\[)
-                     (eq (aref text 0) ?\{)
-                     (eq (aref text 0) ?\<)
-                     (eq (aref text 0) ?\()))
-            (setq text (concat "\\" text)))
-        (alert (if (slack-im-p room) text (format "%s: %s" user-name text))
-               :icon slack-alert-icon
-               :title (if (slack-im-p room)
-                          (funcall slack-message-im-notification-title-format-function
-                                   team-name room-name (slack-thread-message-p message))
-                        (funcall slack-message-notification-title-format-function
-                                 team-name room-name (slack-thread-message-p message)))
                :category 'slack
                :data (list
                       :team-id (slack-team-id team)
@@ -158,7 +133,7 @@
                       :room-name (slack-room-name room team)
                       :team-name (oref team name)
                       :ts (slack-ts message)
-                      :formatted-ts (ts-format "[%H:%m]" (ts-now))))))))
+                      :formatted-ts (ts-format "[%H:%m]" (ts-now)))))))
 
 (cl-defmethod slack-message-sender-equalp ((_m slack-message) _sender-id)
   nil)
